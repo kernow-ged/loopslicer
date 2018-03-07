@@ -14,7 +14,7 @@ It's all ready to go as-is. The emscripten folder has a makefile for producing a
 Somehow various JS concatenators/minifiers did not work for me so I made one big master JS file by hand! This is the version referenced on my site. 
 
 **Thanks**: to, inter alia, Mario 
-(http://www.badlogicgames.com/wordpress/?p=122) et seq
+(http://www.badlogicgames.com/wordpress/?p=122 et seq) 
 for showing a nice way to get started with note-onset detection 
 
 Chris Cannam
