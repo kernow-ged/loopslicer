@@ -6,9 +6,9 @@ WaveSurfer.WebAudio = {
     PAUSED_STATE: 1,
     FINISHED_STATE: 2,
 	
-	DECAY_MAX: 10,
+    DECAY_MAX: 10,
 	
-	browser: 'other',
+    browser: 'other',
 
     supportsWebAudio: function () {
         return !!(window.AudioContext || window.webkitAudioContext);
@@ -617,12 +617,6 @@ WaveSurfer.WebAudio = {
 			var t = new Float32Array(2);
 			t[0] = 1.0;
 			t[1] = 0.0;
-console.log("dk = " + this.decay);
-console.log("acct = " + this.ac.currentTime);
-console.log("pm2 = " + (this.ac.currentTime + parseFloat(this.attack) + parseFloat(this.hold)));
-console.log("start = " + start);
-console.log("loop = " + loop);
-console.log("index = " + index);
 			this.envGainNode.gain.setValueCurveAtTime(t, (this.ac.currentTime + parseFloat(this.attack) + parseFloat(this.hold)), parseFloat(this.decay));
 		}
 
