@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>kernow.me::loopslicer</title>
+        <link href="data:image/gif;" rel="icon" type="image/x-icon" />
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+		<script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script> 
+        <link rel="stylesheet" href="css/style.css" />
+	</head>
+
+    <body itemscope itemtype="http://schema.org/WebApplication">
+		<meta itemprop="applicationCategory" content="Music,Audio" />
+		<meta itemprop="name" content="Loopslicer" />
+		<meta itemprop="about" content="Audio loop slicer and editor. Deconstruct your audio into its constituent beats or notes and export the slices in SFZ+WAV sampler format." /> 
+		<meta itemprop="browserRequirements" content="requires HTML5 Canvas, WebAudio and FileAPI support" /> 
+
+        <div class="container">
+                <h1>loopslicer<small id = "filename"></small></h1>
+			<noscript>
+				<div id = "nojs">
+					<h3 align='center'>
+					This app requires a Javascript-enabled browser to run. It uses the HTML5 Canvas, WebAudio and File APIs. 
+					</h3>
+				</div>
+			</noscript>
+			<div id = "incompat" style="display: none;">
+				<div id = "nojs">
+					<h3 align='center'>
+					It appears that your browser is incompatible with the latest WebAudio and/or File APIs required to run this app. Sorry!
+					</h3>
+				</div>		
+			</div> 			
+            <div id="demo">
+				<div id="waveform">
+						<span id="progressmode"></span>		
+						<div class="progress progress-striped active" id="progress-bar">			
+							<div class="progress-bar progress-bar-info"></div>
+						</div>		
+				</div>
+					<button data-action="zoomin">
+						<i class = "glyphicon glyphicon-zoom-in"> </i>
+					</button>
+					
+					<button data-action="zoomout">
+						<i class = "glyphicon glyphicon-zoom-out"> </i>
+					</button>
+
+				<div id="saveModal" class="modal fade" role="dialog" data-backdrop="false">
+				  <div class="modal-dialog">
+					<div class="modal-content">
+					  <div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Save </h4>
+					  </div>
+					  <div class="modal-body"> 
+						<p>Exporting <span id = "slices"></span> slices between L and R locators</p>
+						<span id = "zeroslicewarning"></span>
+						<div class = "row">
+							<div class="col-md-6">		
+								<p><b>SFZ / MIDI options</b><br />
+								Midi start note: <b><span id="midibase">C0</span></b>
+								<form class="form-inline">
+								  <select class="form-control" id="sel1" style="width: 35%">
+									<option>C</option>
+									<option>C#</option>
+									<option>D</option>
+									<option>D#</option>
+									<option>E</option>
+									<option>F</option>
+									<option>F#</option>
+									<option>G</option>
+									<option>G#</option>
+									<option>A</option>
+									<option>A#</option>
+									<option>B</option>							
+								</select>
+								  <select class="form-control" id="sel2" style="width: 35%">
+									<option>0</option>
+									<option>1</option>
+									<option>2</option>
+									<option>3</option>
+									<option>4</option>
+									<option>5</option>
+									<option>6</option>
+									<option>7</option>
+									<option>8</option>
+									<option>9</option>
+									<option>10</option> 		
+								</select>	
+								<br /><br />
+									<div class="radio">
+										<label>
+											<input type="radio" name="rb" id ="rbtnC" checked="checked"> Use the chromatic scale
+										</label>
+									</div>
+								<br />
+									<div class="radio">
+										<label>
+											<input type="radio" name="rb" id="rbtnW"> Use white notes only
+										</label>
+									</div>
+								<br />
+									<div class="radio">
+										<label>
+											<input type="radio" name="rb" id="rbtnB"> Use black notes only
+										</label>
+									</div>
+								<br /><br />
+								Available notes: <span id="avnotes"></span><br />
+								<span id="avnotewarn"></span>
+								</form>
+								</p>
+							</div>
+							<div class = "col-md-6">
+							<p><b>Time signature</b><br />
+							<span id="timesig">4/4</span>
+								<form class="form-inline">
+								  <select class="form-control" id="sel3" style="width: 35%">
+									<option>2</option>
+									<option>3</option>
+									<option>4</option>
+									<option>5</option>
+									<option>6</option>
+									<option>7</option>
+									<option>8</option>
+									<option>9</option>
+									<option>10</option>
+									<option>11</option>
+									<option>12</option>
+									<option>13</option>
+									<option>14</option>
+									<option>15</option>
+									<option>16</option>
+									<option>17</option>	
+									<option>18</option>
+									<option>19</option>
+									<option>20</option>
+									<option>21</option>
+									<option>22</option>
+									<option>23</option>						
+								   </select>
+								  <select class="form-control" id="sel4" style="width: 35%">
+									<option>2</option>
+									<option>4</option>
+									<option>8</option>
+									<option>16</option>
+									<option>32</option>
+								  </select>	
+								  <br /><br />
+								  Bars: <input type="text" class="form-control" id="bars" style="width: 20%">&nbsp;&nbsp;
+								  Extra beats: <input type="text" class="form-control" id="beats" style="width: 20%">
+								  <br /><br />							  
+								  Estimated BPM: <b>&#9833; = <span id="estbpm"></span></b><br />
+								</form>
+							</div>
+						</div>
+					  </div>
+					  <div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-action="save">Save</button>
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+					  </div>
+					</div>
+				  </div>
+				</div>	
+				
+                <div class="controls">		
+					<label class="btn btn-primary" for="openfile">
+						<i class="glyphicon glyphicon-open-file"></i>
+						<input id="openfile" type="file" style="display:none;">
+						Open
+					</label>			
+                    <button class="btn btn-primary" data-action="play" id="playbtn">
+                        <i class="glyphicon glyphicon-play-circle"></i>
+                        Play
+                        /
+                        <i class="glyphicon glyphicon-pause"></i>
+                        Pause
+                    </button>				
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#saveModal" data-action="opensavedialog">
+                        <i class="glyphicon glyphicon-save"></i>
+                        Save
+                    </button>
+				</div>	
+				
+				<div class = "row">	
+					<div class="col-md-1"><div class="ctrlsectionheading"></div>
+					</div>	
+					
+					<div class="col-md-2"><div class="ctrlsectionheading">Transient detection</div>
+						<div class = "fxsec">
+							Threshold <span id = 'thrshunits'></span>
+							<input data-action="tdetect" type="range" min="0" max="100" value="30" style="width: 100%" />
+						</div> 
+						<div class = "fxsec"><div class="ctrlsectionheading">Nudge all</div>
+							<div align = "center">
+								<button data-action="nudgeleft">
+									<i class="glyphicon glyphicon-arrow-left"></i>
+								</button>
+								<button data-action="nudgeright">
+									<i class="glyphicon glyphicon-arrow-right"></i>
+								</button>
+							</div>
+						</div> 						
+					 </div>						 
+					<div class="col-md-2"><div class="ctrlsectionheading">Playback</div>
+						<div class="fxsec">
+							Tempo <span id = 'tempounits'></span>
+							  <input data-action="tempo" type="range"  min="0.4" max="4.0" step="0.01" value="1.0" style="width: 100%" />
+							Pitch  <span id = 'pitchunits'></span>
+							  <input data-action="pitch" type="range"  min="-24" max="24" step="1" value="0" />
+						</div>
+					</div>	
+					
+					<div class="col-md-2"><div class="ctrlsectionheading">Envelope</div>
+						<div class="fxsec">
+							Attack  <span id = 'attackunits'></span>
+							  <input data-action="attack" type="range"  min="0" max="250" step="1" value="0" style="width: 100%" />
+							Hold  <span id = 'holdunits'></span>
+							  <input data-action="hold" type="range"  min="0" max="5000" step="0.1" value="0" style="width: 100%" />							
+							Decay  <span id = 'decayunits'></span>
+							  <input data-action="decay" type="range"  min="0.0" max="10000" step="1" value="10000" style="width: 100%" />
+						</div>
+					</div>	
+					
+					<div class="col-md-2"><div class="ctrlsectionheading">Compressor</div> 
+						<div class="fxsec">
+							Threshold   <span id = 'compthresholdunits'></span>
+								  <input data-action="compthreshold" type="range"  min="-100" max="0" step="1" value="0" style="width: 100%" />
+							Ratio  <span id = 'compratiounits'></span>
+								  <input data-action="compratio" type="range"  min="1" max="20" step="1" value="1" style="width: 100%" />
+							Attack  <span id = 'compattackunits'></span> 
+								  <input data-action="compattack" type="range"  min="0.0" max="1.0" step="0.01" value="0.0" style="width: 100%" />
+							Release  <span id = 'compreleaseunits'></span>
+								  <input data-action="comprelease" type="range"  min="0.0" max="1.0" step="0.01" value="0.1" style="width: 100%" />
+							Gain  <span id = 'gainunits'></span> 
+								  <input data-action="gain" type="range"  min="-24" max="24.0" step="1" value="0" style="width: 100%" />
+						</div>	  
+					</div>
+				
+					<div class="col-md-2">
+						<div class="fxsec"><div class="ctrlsectionheading">Low</div>
+							Freq   <span id = 'lofrequnits'></span>
+								  <input data-action="lofreq" type="range"  min="40" max="1000" step="1" value="250" style="width: 100%" />
+							Gain  <span id = 'logainunits'></span>
+								  <input data-action="logain" type="range"  min="-24" max="24" step="1" value="0" style="width: 100%" />						
+						</div>
+						<div class="fxsec"><div class="ctrlsectionheading">Mid</div>
+							Freq   <span id = 'midfrequnits'></span>
+								  <input data-action="midfreq" type="range"  min="500" max="10000" step="1" value="1000" style="width: 100%" />
+							Gain  <span id = 'midgainunits'></span>
+								  <input data-action="midgain" type="range"  min="-24" max="24" step="1" value="0" style="width: 100%" />
+							Q  <span id = 'midqunits'></span>
+								  <input data-action="midq" type="range"  min="1" max="100" step="1" value="1" style="width: 100%" />								  
+						</div>
+						<div class="fxsec"><div class="ctrlsectionheading">High</div>
+							Freq   <span id = 'hifrequnits'></span>
+								  <input data-action="hifreq" type="range"  min="1000" max="15000" step="1" value="5000" style="width: 100%" />
+							Gain  <span id = 'higainunits'></span>
+								  <input data-action="higain" type="range"  min="-24" max="24" step="1" value="0" style="width: 100%" />							
+						</div>						
+					</div>
+					
+					<div class="col-md-1"><div class="ctrlsectionheading"></div>
+					</div>				
+					 
+             </div>
+	    </div>
+		<br />
+		<div class="panel panel-default">
+			<div class="panel-heading">About this app:</div>
+			<div class="panel-body">
+				<p>
+				Best viewed/operated on a laptop or desktop computer for full functionality.
+				</p>
+				<p>
+				Nothing is uploaded. The app does not even request any cookies. All action takes place on your local machine.
+				Load an audio file (WAV/MP3/OGG/M4A... and possibly other formats too) via the Open button, or drag/drop it onto the loop area. This should be a fairly short audio file (like typically a few bars of drumming) for best results: 
+				though the app won't try and stop you from loading larger files such as entire songs, this is not what it was designed for and results may be unexpected. 
+				</p>
+				<p>
+				The sound does not necessarily have to be drums, as long as there are rhythmic/impulsive events in it. In fact most samples of instrumental phrases, or even speech, will fit the bill. 
+				But a sample of a steady-state drone, or something of that nature, is not really suitable. The app will attempt to divide your audio file into 
+				segments based on the transients it can find. Turn the Threshold slider up to capture more transients, or down to reject transients below a certain threshold.
+				</p>
+				<p>
+				Click on a segment to audition it in isolation. Move the L and R indicators to change the loop points if needed. 
+				Press the Play button (or use the space bar) to preview or pause the entire loop. 
+				You can move the slice markers around for a better fit, add them manually to the waveform with shift-click and delete them by hovering over the marker with the mouse and pressing the delete key.
+				</p>
+				<p>
+				Use the Save button to export a zip file containing your slices in separate WAV files, plus an SFZ file that can be used in a number of software samplers 
+				(the author uses <a href="https://www.linuxsampler.org/">Linuxsampler</a>), and a MIDI file that retains the timing and tempo of your edited loop. This exported zip file is manufactured with the help of <a href="https://stuk.github.io/jszip/">JSZip</a>.
+				</p>
+				<p>
+				(Tip: SFZ files are just text in a simple markup language. If you wanted to, you could <a href="http://www.sfzformat.com/index.php?title=Main_Page">tweak them further by hand</a>, or use the free editor <a href="http://audio.clockbeat.com/sfZed.html">sfZed</a> to edit them.)
+				</p>
+				<p>Waveform view and playback powered by <a href="https://github.com/katspaugh/wavesurfer.js">wavesurfer.js</a>, licensed under <a href="https://creativecommons.org/licenses/by/3.0/deed.en_US">https://creativecommons.org/licenses/by/3.0/deed.en_US</a>,	
+				with modifications by myself. 
+				</p>
+			</div>
+		</div>
+
+		<script src="js/util/bowser.min.js"></script>
+		<script src="js/util/jszip.min.js"></script>
+		<script src="js/util/FileSaver.js"></script>
+		
+		<script src="js/fft/FFTExtAsm.js"></script>
+		<script src="js/fft/FFTExt.js"></script>			
+		<script src="js/fft/fftwola.js"></script>
+		
+		<script src="js/wavesurfer/wavesurfer.js"></script>
+		<script src="js/wavesurfer/util.js"></script>
+		<script src="js/wavesurfer/filemaker.js"></script>	
+		<script src="js/wavesurfer/webaudio.js"></script>
+		<script src="js/wavesurfer/mediaelement.js"></script>
+		<script src="js/wavesurfer/drawer.js"></script>
+		<script src="js/wavesurfer/drawer.canvas.js"></script>
+		<script src="js/wavesurfer/html-init.js"></script>
+		<script src="js/wavesurfer/tpool.js"></script>		
+		<script src="js/wavesurfer/wavesurfer.regions.js"></script>
+		
+		<script src="js/app.js"></script>
+		<script src="js/ctrl.js"></script>
+
+    </body>
+</html>

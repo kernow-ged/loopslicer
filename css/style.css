@@ -1,0 +1,55 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 10px;
+	padding-left: 10px;
+    padding-right: 10px;
+}
+
+.controls {
+    padding: 20px 0 20px;
+    text-align: center;
+}
+
+.controls .btn {
+    margin-bottom: 10px;
+    margin-right: 15px;	
+}
+
+#waveform {
+    position: relative;
+	border-top: 1px solid #ddd;
+	border-bottom: 1px solid #ddd;
+}
+
+#progress-bar {
+    position: absolute;
+    z-index: 10;
+    top: 50%;
+    margin-top: -10px;
+    left: 5%;
+    width: 90%;
+}
+
+#nojs {
+	border: 3px dashed #333;
+	color: #000;
+    background-color: #ff0;
+	margin: 15px 15px 15px 15px;
+}
+
+.ctrlsectionheading {
+	color: #333;
+	font-weight: 600;
+	margin-bottom: 8px;	
+	text-align: center;
+}
+
+.fxsec {
+	margin-bottom: 10px;	
+}
+
+button:disabled {
+	color: #333;
+} 
+
+.modal { background: rgba(000, 000, 000, 0.8); min-height:1000000px; }
